@@ -1,7 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "🥚 New Break a Brainrot Egg | Skyming",
+   Name = "🥚 New Break a Brainrot Egg | Skyming Anubissxxxx",
    LoadingTitle = "Brainrot Egg loading...",
    LoadingSubtitle = "Auto Farm + TP + ESP + Movement + AUTO DAMAGE PvP",
    ConfigurationSaving = {
