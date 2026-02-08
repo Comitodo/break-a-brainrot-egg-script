@@ -1,0 +1,443 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "🥚 New Break a Brainrot Egg | Skyming",
+   LoadingTitle = "Brainrot Egg loading...",
+   LoadingSubtitle = "Auto Farm + TP + ESP + Movement + AUTO DAMAGE PvP",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil,
+      FileName = "BrainrotEggFullPvPHub",
+   },
+   KeySystem = false,
+})
+
+Rayfield:Notify({
+   Title = "FULL HUB + PvP Cargado ✅",
+   Content = "Auto Collect + Auto Hatch + Auto TP Money + Auto TP Eggs + ESP + Movement + AUTO DAMAGE (PvP)",
+   Duration = 8,
+   Image = 4483362458,
+})
+
+-- ====================================================
+-- TABS
+-- ====================================================
+local MoveTab = Window:CreateTab("✈️ Movement", 4483362458)
+local AutoTab = Window:CreateTab("🤖 Auto Farm", 4483362458)
+local MoneyTab = Window:CreateTab("💰 Money Farm", 4483362458)
+local EggsTab = Window:CreateTab("🥚 Eggs TP", 4483362458)
+local PvPTab = Window:CreateTab("⚔️ PvP Damage", 4483362458)
+local VisualsTab = Window:CreateTab("👁️ ESP", 4483362458)
+
+-- ====================================================
+-- MOVEMENT
+-- ====================================================
+MoveTab:CreateSection("Movement Cheats")
+
+MoveTab:CreateToggle({
+   Name = "Infinite Jump",
+   CurrentValue = false,
+   Flag = "InfJumpEgg",
+   Callback = function(Value)
+      if Value then
+         getgenv().InfJumpConnEgg = game:GetService("UserInputService").JumpRequest:Connect(function()
+            local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+         end)
+      else
+         if getgenv().InfJumpConnEgg then getgenv().InfJumpConnEgg:Disconnect() end
+      end
+   end,
+})
+
+MoveTab:CreateToggle({
+   Name = "Speed x3",
+   CurrentValue = false,
+   Flag = "SpeedEgg",
+   Callback = function(Value)
+      local hum = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+      if hum then hum.WalkSpeed = Value and 48 or 16 end
+   end,
+})
+
+MoveTab:CreateToggle({
+   Name = "Fly (WASD + Space/Ctrl)",
+   CurrentValue = false,
+   Flag = "FlyEgg",
+   Callback = function(Value)
+      getgenv().FlyEnabledEgg = Value
+      local player = game.Players.LocalPlayer
+      local uis = game:GetService("UserInputService")
+      if Value then
+         local char = player.Character or player.CharacterAdded:Wait()
+         local hrp = char:WaitForChild("HumanoidRootPart")
+         local bv = Instance.new("BodyVelocity")
+         bv.MaxForce = Vector3.new(4000, 4000, 4000)
+         bv.Parent = hrp
+         getgenv().FlyBVEgg = bv
+         game:GetService("RunService").Heartbeat:Connect(function()
+            if not getgenv().FlyEnabledEgg then return end
+            local cam = workspace.CurrentCamera
+            local speed = 60
+            local dir = Vector3.new()
+            if uis:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end
+            if uis:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end
+            if uis:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
+            if uis:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
+            if uis:IsKeyDown(Enum.KeyCode.Space) then dir += Vector3.new(0,1,0) end
+            if uis:IsKeyDown(Enum.KeyCode.LeftControl) then dir -= Vector3.new(0,1,0) end
+            bv.Velocity = dir.Unit * speed
+         end)
+      else
+         if getgenv().FlyBVEgg then getgenv().FlyBVEgg:Destroy() getgenv().FlyBVEgg = nil end
+      end
+   end,
+})
+
+-- ====================================================
+-- AUTO FARM EGGS + AUTO HATCH
+-- ====================================================
+AutoTab:CreateSection("Eggs & Hatch")
+
+AutoTab:CreateToggle({
+   Name = "Auto Collect Eggs (EggRenderModels)",
+   CurrentValue = false,
+   Flag = "AutoCollectEggs",
+   Callback = function(Value)
+      getgenv().AutoCollectEggsEnabled = Value
+      if Value then
+         spawn(function()
+            while getgenv().AutoCollectEggsEnabled do
+               pcall(function()
+                  local eggFolder = workspace:FindFirstChild("EggRenderModels")
+                  if eggFolder then
+                     for _, egg in ipairs(eggFolder:GetChildren()) do
+                        if egg:IsA("Model") then
+                           local prompt = egg:FindFirstChildOfClass("ProximityPrompt", true) or egg:FindFirstChildOfClass("ClickDetector", true)
+                           if prompt then
+                              if prompt:IsA("ProximityPrompt") then fireproximityprompt(prompt) else fireclickdetector(prompt) end
+                           end
+                        end
+                     end
+                  end
+               end)
+               task.wait(0.18)
+            end
+         end)
+      end
+   end,
+})
+
+AutoTab:CreateToggle({
+   Name = "Auto Hatch Eggs",
+   CurrentValue = false,
+   Flag = "AutoHatchEggs",
+   Callback = function(Value)
+      getgenv().AutoHatchEnabled = Value
+      if Value then
+         spawn(function()
+            while getgenv().AutoHatchEnabled do
+               pcall(function()
+                  for _, obj in ipairs(workspace:GetDescendants()) do
+                     if obj:IsA("ProximityPrompt") and (obj.ActionText:lower():find("hatch") or obj.ActionText:lower():find("open") or obj.Parent.Name:lower():find("hatch")) then
+                        fireproximityprompt(obj)
+                     end
+                  end
+               end)
+               task.wait(1.2)
+            end
+         end)
+      end
+   end,
+})
+
+-- ====================================================
+-- AUTO MONEY (BaseA/B/D → Platforms → Platforms_1 → Collect)
+-- ====================================================
+MoneyTab:CreateSection("Auto Money Collect")
+
+MoneyTab:CreateToggle({
+   Name = "Auto TP & Collect Money (BaseA/B/D)",
+   CurrentValue = false,
+   Flag = "AutoMoney",
+   Callback = function(Value)
+      getgenv().AutoMoneyEnabled = Value
+   end,
+})
+
+MoneyTab:CreateSlider({
+   Name = "Intervalo Auto Money (seg)",
+   Range = {2, 12},
+   Increment = 1,
+   CurrentValue = 5,
+   Flag = "MoneyInterval",
+   Callback = function(Value)
+      getgenv().MoneyInterval = Value
+   end,
+})
+
+-- ====================================================
+-- AUTO TP EGGS
+-- ====================================================
+EggsTab:CreateSection("Auto TP Eggs")
+
+EggsTab:CreateToggle({
+   Name = "Auto TP al Egg más cercano",
+   CurrentValue = false,
+   Flag = "AutoTPEggs",
+   Callback = function(Value)
+      getgenv().AutoTPEggsEnabled = Value
+   end,
+})
+
+EggsTab:CreateSlider({
+   Name = "Distancia máxima Auto TP Eggs",
+   Range = {50, 1000},
+   Increment = 50,
+   CurrentValue = 400,
+   Flag = "AutoTPDistEgg",
+   Callback = function(Value)
+      getgenv().AutoTPDistEgg = Value
+   end,
+})
+
+EggsTab:CreateSlider({
+   Name = "Intervalo Auto TP Eggs (seg)",
+   Range = {1, 10},
+   Increment = 1,
+   CurrentValue = 3,
+   Flag = "AutoTPIntervalEgg",
+   Callback = function(Value)
+      getgenv().AutoTPIntervalEgg = Value
+   end,
+})
+
+EggsTab:CreateButton({
+   Name = "TP Manual al Egg más cercano",
+   Callback = function()
+      tpToNearestEgg()
+      Rayfield:Notify({Title = "TP Manual", Content = "¡Al egg más cercano!", Duration = 3})
+   end,
+})
+
+-- ====================================================
+-- PvP AUTO DAMAGE
+-- ====================================================
+PvPTab:CreateSection("Auto Damage PvP")
+
+local PlayerList = {}
+
+local function refreshPlayers()
+   PlayerList = {"None"}
+   for _, plr in ipairs(game.Players:GetPlayers()) do
+      if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+         table.insert(PlayerList, plr.Name)
+      end
+   end
+end
+
+PvPTab:CreateButton({
+   Name = "🔄 Refresh Player List",
+   Callback = function()
+      refreshPlayers()
+      PlayerDropdown:Refresh(PlayerList, true)
+      Rayfield:Notify({Title = "Lista Actualizada", Content = #PlayerList - 1 .. " jugadores detectados", Duration = 4})
+   end,
+})
+
+local PlayerDropdown = PvPTab:CreateDropdown({
+   Name = "Seleccionar Jugador para Atacar",
+   Options = {"None"},
+   CurrentOption = "None",
+   Flag = "TargetPlayer",
+   Callback = function(Option)
+      if Option == "None" then
+         getgenv().TargetPlayer = nil
+      else
+         getgenv().TargetPlayer = game.Players:FindFirstChild(Option)
+         Rayfield:Notify({Title = "Objetivo", Content = "Atacando a: " .. Option, Duration = 4})
+      end
+   end,
+})
+
+PvPTab:CreateToggle({
+   Name = "Auto Damage (Aim + Swing Tool)",
+   CurrentValue = false,
+   Flag = "AutoDamagePvP",
+   Callback = function(Value)
+      getgenv().AutoDamageEnabled = Value
+   end,
+})
+
+PvPTab:CreateSlider({
+   Name = "Distancia máxima para atacar",
+   Range = {10, 300},
+   Increment = 10,
+   CurrentValue = 80,
+   Flag = "PvPDist",
+   Callback = function(Value)
+      getgenv().PvPDistance = Value
+   end,
+})
+
+-- ====================================================
+-- VARIABLES GLOBALES
+-- ====================================================
+getgenv().AutoCollectEggsEnabled = false
+getgenv().AutoHatchEnabled = false
+getgenv().AutoMoneyEnabled = false
+getgenv().AutoTPEggsEnabled = false
+getgenv().ESPEggsRenderEnabled = false
+getgenv().AutoDamageEnabled = false
+
+getgenv().AutoTPDistEgg = 400
+getgenv().AutoTPIntervalEgg = 3
+getgenv().MoneyInterval = 5
+getgenv().ESPEggDist = 1000
+getgenv().PvPDistance = 80
+getgenv().TargetPlayer = nil
+
+-- ====================================================
+-- SERVICIOS
+-- ====================================================
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local localPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- ====================================================
+-- AUTO MONEY (TP a Collect)
+-- ====================================================
+spawn(function()
+   while true do
+      task.wait(getgenv().MoneyInterval or 5)
+      if not getgenv().AutoMoneyEnabled then continue end
+      
+      local hrp = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+      if not hrp then continue end
+      
+      for _, baseName in ipairs({"BaseA", "BaseB", "BaseD"}) do
+         local base = workspace:FindFirstChild(baseName)
+         if base then
+            local platforms = base:FindFirstChild("Platforms")
+            if platforms then
+               local platforms1 = platforms:FindFirstChild("Platforms_1")
+               if platforms1 then
+                  local collectPart = platforms1:FindFirstChild("Collect")
+                  if collectPart and collectPart:IsA("BasePart") then
+                     hrp.CFrame = CFrame.new(collectPart.Position + Vector3.new(0, 5, 0))
+                     for _, prompt in ipairs(collectPart.Parent:GetDescendants()) do
+                        if prompt:IsA("ProximityPrompt") then fireproximityprompt(prompt) end
+                     end
+                  end
+               end
+            end
+         end
+      end
+   end
+end)
+
+-- ====================================================
+-- AUTO TP EGGS
+-- ====================================================
+function tpToNearestEgg()
+   local hrp = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+   if not hrp then return end
+   
+   local eggFolder = workspace:FindFirstChild("EggRenderModels")
+   if not eggFolder then return end
+   
+   local nearest, minDist = nil, math.huge
+   for _, egg in ipairs(eggFolder:GetChildren()) do
+      if egg:IsA("Model") and egg.PrimaryPart then
+         local dist = (egg.PrimaryPart.Position - hrp.Position).Magnitude
+         if dist < minDist then minDist = dist nearest = egg end
+      end
+   end
+   
+   if nearest and nearest.PrimaryPart then
+      hrp.CFrame = CFrame.new(nearest.PrimaryPart.Position + Vector3.new(0, 5, 0))
+   end
+end
+
+spawn(function()
+   while true do
+      task.wait(getgenv().AutoTPIntervalEgg or 3)
+      if getgenv().AutoTPEggsEnabled then tpToNearestEgg() end
+   end
+end)
+
+-- ====================================================
+-- AUTO DAMAGE PvP (Aim + Auto Swing Tool)
+-- ====================================================
+spawn(function()
+   while true do
+      task.wait(0.12) -- velocidad de ataque ~8 hits/segundo
+      
+      if not getgenv().AutoDamageEnabled then continue end
+      if not getgenv().TargetPlayer then continue end
+      
+      local target = getgenv().TargetPlayer
+      if not target or not target.Character or not target.Character:FindFirstChild("HumanoidRootPart") then continue end
+      
+      local hrp = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+      if not hrp then continue end
+      
+      local dist = (target.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
+      if dist > getgenv().PvPDistance then continue end
+      
+      -- Auto aim (cámara hacia el target)
+      Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, target.Character.HumanoidRootPart.Position + Vector3.new(0, 2, 0))
+      
+      -- Auto swing tool (activar tool si está equipado)
+      local tool = localPlayer.Character:FindFirstChildOfClass("Tool")
+      if tool then
+         tool:Activate()
+      end
+   end
+end)
+
+-- ====================================================
+-- ESP Eggs
+-- ====================================================
+local EggDrawings = {}
+
+local function cleanupEggESP()
+   for _, d in pairs(EggDrawings) do if d and d.Remove then d:Remove() end end
+   EggDrawings = {}
+end
+
+RunService.RenderStepped:Connect(function()
+   cleanupEggESP()
+   if not getgenv().ESPEggsRenderEnabled then return end
+   
+   local hrp = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+   if not hrp then return end
+   
+   local eggFolder = workspace:FindFirstChild("EggRenderModels")
+   if eggFolder then
+      for _, egg in ipairs(eggFolder:GetChildren()) do
+         if egg:IsA("Model") and egg.PrimaryPart then
+            local dist = (egg.PrimaryPart.Position - hrp.Position).Magnitude
+            if dist > getgenv().ESPEggDist then continue end
+            
+            local pos, onScreen = Camera:WorldToViewportPoint(egg.PrimaryPart.Position)
+            if onScreen then
+               local text = Drawing.new("Text")
+               text.Position = Vector2.new(pos.X, pos.Y)
+               text.Size = 16
+               text.Color = Color3.fromRGB(255, 200, 0)
+               text.Outline = true
+               text.Center = true
+               text.Font = 2
+               text.Text = egg.Name .. "\n(" .. math.floor(dist) .. ")"
+               text.Visible = true
+               table.insert(EggDrawings, text)
+            end
+         end
+      end
+   end
+end)
+
+print("✅ FULL HUB + PvP Cargado: Todo incluido")
